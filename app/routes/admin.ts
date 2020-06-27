@@ -1,32 +1,14 @@
-import {NextFunction, Request, Response, Router} from "express";
-
-import path from "path";
-
+import {Router} from "express";
 import express from 'express';
-
-import rootDir from '../helpers/path';
-import {Product} from "../types/types";
+import {getAddProduct, postAddProduct} from "../controllers/products"
 
 const router: Router = express.Router();
-const products: Product[] = [];
 
-router.get('/add-product', (req: Request, res: Response, next: NextFunction) => {
-    res.render('add-product', {
-        pageTitle: 'Add Product',
-        path:'/admin/add-product',
-        formCSS:true,
-        productCSS: true,
-        activeAddProduct: true
-    })
-});
+router.get('/add-product', getAddProduct);
 
-router.post('/add-product', (req: Request, res: Response, next: NextFunction) => {
-    products.push({title: req.body.title});
-    res.redirect('/');
-});
+router.post('/add-product', postAddProduct);
 
 export {
-    router,
-    products
+    router
 };
 

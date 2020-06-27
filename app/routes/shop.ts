@@ -1,12 +1,10 @@
-import {NextFunction, Request, Response, Router} from "express";
-
-import path from 'path';
-import express from 'express';
+import express, {Router} from "express";
+import * as adminData from "./admin";
 
 const router: Router = express.Router();
 
 router.get('/', (req, res, next) => {
-   res.sendFile(path.join(__dirname, '..', 'views', 'shop.html'));
+   res.render('shop', {prods: adminData.products, pageTitle: 'Shop', path:'/'});
 });
 
 export default router;

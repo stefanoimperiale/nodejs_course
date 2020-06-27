@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Page Not Found</title>
+    <title>{{pageTitle}}</title>
     <link rel="stylesheet" href="/css/main.css">
     {{#if productCSS}}
         <link rel="stylesheet" href="/css/product.css">
     {{/if}}
-    {{#if formsCSS}}
+    {{#if formCSS}}
         <link rel="stylesheet" href="/css/forms.css">
     {{/if}}
 </head>
@@ -20,4 +20,6 @@
             </ul>
         </nav>
     </header>
+    {{{ body }}}
 </body>
+</html>

@@ -4,14 +4,16 @@ import path from "path";
 
 import express from 'express';
 
+import rootDir from '../helpers/path';
+
 const router: Router = express.Router();
 
-router.get('/product', (req: Request, res: Response, next: NextFunction) => {
-    res.sendFile(path.join(__dirname, '../', 'views', 'add-product.html'))
+router.get('/add-product', (req: Request, res: Response, next: NextFunction) => {
+    res.sendFile(path.join(rootDir, 'views', 'add-product.html'))
 });
 
-router.post('/product', (req: Request, res: Response, next: NextFunction) => {
-    // console.log(req.body)
+router.post('/add-product', (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body)
     res.redirect('/');
 });
 

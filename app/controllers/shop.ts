@@ -4,44 +4,43 @@ import Cart from "../models/cart";
 
 
 export const getProducts = async (req: Request, res: Response) => {
-    const products = await Product.fetchAll();
+    const [rows, fieldData] = await Product.fetchAll();
     res.render('shop/product-list', {
-        prods: products,
+        prods: rows,
         pageTitle: 'All Products',
         path: '/products',
-        hasProducts: products.length > 0,
-        activeShop: true,
-        productCSS: true,
     });
 }
 
 export const getProduct = async (req: Request<{ productId: string }>, res: Response) => {
     const productId = +req.params.productId;
-    const product = await Product.findById(productId);
-    res.render('shop/product-detail', {
-        pageTitle: product?.title,
-        path: '/products',
-        product
-    });
+    try {
+        const [product] = await Product.findById(productId);
+        res.render('shop/product-detail', {
+            pageTitle: product[0].title,
+            path: '/products',
+            product: product[0]
+        });
+    }catch (e) {
+        // tslint:disable-next-line:no-console
+        console.log(e);
+    }
 }
 
 export const getIndex = async (req: Request, res: Response) => {
-    const products = await Product.fetchAll();
+    const [rows, fieldData] = await Product.fetchAll();
     res.render('shop/index', {
-        prods: products,
+        prods: rows,
         pageTitle: 'Shop',
         path: '/',
-        hasProducts: products.length > 0,
-        activeShop: true,
-        productCSS: true,
     });
 }
 
 export const getCart = async (req: Request, res: Response) => {
     const cart = await Cart.getCart();
-    const products = await Product.fetchAll();
+    const [rows, fieldData] = await Product.fetchAll();
     const cartProducts = [];
-    for (const product of products) {
+    for (const product of rows) {
         const cartProductData = cart?.products.find(prod => prod.id === product.id);
         if (cartProductData) {
             cartProducts?.push({ productData: product, qty: cartProductData.qty });

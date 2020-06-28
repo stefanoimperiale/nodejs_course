@@ -10,23 +10,23 @@ import {
     postCartDeleteProduct
 } from "../controllers/shop"
 
-const router: Router = express.Router();
+const shop: Router = express.Router();
 
-router.get('/', getIndex);
+shop.get('/', getIndex);
 
-router.get('/products', getProducts)
+shop.get('/products', getProducts)
 
-router.get('/products/:productId', getProduct)
+shop.get('/products/:productId', getProduct)
 
-router.get('/cart', getCart)
+shop.get('/cart', getCart)
 
-router.post('/cart', postCart);
+shop.post('/cart', postCart);
 
-router.post('/cart-delete-item', postCartDeleteProduct);
+shop.post('/cart-delete-item', postCartDeleteProduct);
 
-router.get('/orders', getOrders);
+shop.get('/orders', getOrders);
 
-router.get('/checkout', getCheckout)
+shop.get('/checkout', getCheckout)
 
 
-export default router;
+export default shop;

@@ -9,20 +9,20 @@ import {
     postEditProduct
 } from "../controllers/admin"
 
-const router: Router = express.Router();
+const admin: Router = express.Router();
 
-router.get('/add-product', getAddProduct);
+admin.get('/add-product', getAddProduct);
 
-router.get('/products', getProducts);
+admin.get('/products', getProducts);
 
-router.post('/add-product', postAddProduct);
+admin.post('/add-product', postAddProduct);
 
-router.get('/edit-product/:productId', getEditProduct)
+admin.get('/edit-product/:productId', getEditProduct)
 
-router.post('/edit-product', postEditProduct);
+admin.post('/edit-product', postEditProduct);
 
-router.post('/delete-product', postDeleteProduct);
+admin.post('/delete-product', postDeleteProduct);
 
-export default router;
+export default admin;
 
 

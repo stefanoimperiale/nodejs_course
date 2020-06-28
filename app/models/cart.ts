@@ -1,6 +1,6 @@
 import fs from "fs-extra"
 import path from "path";
-import dirname from "../helpers/path";
+import dirname from "../util/path";
 
 const p = path.join(dirname, 'data', 'cart.json');
 

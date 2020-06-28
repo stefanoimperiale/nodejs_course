@@ -1,16 +1,9 @@
-import fs from "fs-extra";
-import dirname from "../helpers/path"
+import dirname from "../util/path"
 import path from "path";
+import db from "../util/database"
 import Cart from "./cart";
 
 const p = path.join(dirname, 'data', 'products.json');
-
-
-function getProductsFromFile(): Promise<Product[]> {
-    return fs.promises.readFile(p, "utf-8")
-        .then(fileContent => JSON.parse(fileContent))
-        .catch(_ => []);
-}
 
 export default class Product {
 
@@ -24,41 +17,27 @@ export default class Product {
     }
 
     public async save() {
-        const products = await getProductsFromFile();
-        let updatedProducts;
-        if (this.id) {
-            const existingProductIndex = products.findIndex(prod => prod.id === this.id);
-            updatedProducts = [...products];
-            updatedProducts[existingProductIndex] = this;
-        } else {
-            this.id = Math.random();
-            products.push(this);
-            updatedProducts = products;
-        }
-        fs.outputFile(p, JSON.stringify(updatedProducts), (writeErr) => {
-            // tslint:disable-next-line:no-console
-            if (writeErr) console.error(writeErr)
-        });
+        return db.execute(`INSERT INTO products (title, price, imageUrl, description)
+                    VALUES (?, ?, ?, ?)`,[this.title, this.price, this.imageUrl, this.description]);
     }
 
     static async deleteById(id: number) {
-       const products = await getProductsFromFile();
-       const product = products.find(prod => prod.id === id);
-       if (!product) throw new Error(`product with id ${id} not found`);
-       const updatedProducts = products.filter(prod => prod.id !== id);
-       fs.outputFile(p, JSON.stringify(updatedProducts), err => {
-           if (!err) {
-               Cart.deleteProduct(id, product.price);
-           }
-       })
+        // const products = await getProductsFromFile();
+        // const product = products.find(prod => prod.id === id);
+        // if (!product) throw new Error(`product with id ${id} not found`);
+        // const updatedProducts = products.filter(prod => prod.id !== id);
+        // fs.outputFile(p, JSON.stringify(updatedProducts), err => {
+        //     if (!err) {
+        //         Cart.deleteProduct(id, product.price);
+        //     }
+        // })
     }
 
-    static fetchAll(): Promise<Product[]> {
-        return getProductsFromFile();
+    static fetchAll() {
+        return db.execute('SELECT * FROM products')
     }
 
-    static async findById(id: number): Promise<Product | undefined> {
-        const products = await getProductsFromFile();
-        return products.find(pr => pr.id === id);
+    static findById(id: number) {
+       return db.execute('SELECT * FROM products WHERE products.id = ?', [id]);
     }
 }

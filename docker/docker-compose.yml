@@ -1,0 +1,12 @@
+version: "3.3"
+services:
+  mysql_node:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'node-db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'node-psw'
+      MYSQL_ROOT_PASSWORD: 'root-psw'
+    ports:
+      - 3306:3306

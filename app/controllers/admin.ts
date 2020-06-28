@@ -26,7 +26,12 @@ export const getEditProduct = async (req: Request<{edit: string, productId: stri
 export const postAddProduct = async (req: Request<any, any, Product>, res: Response) => {
     const {title, imageUrl, price, description} = req.body;
     const product = new Product(null, title, imageUrl, description, +price);
-    await product.save();
+    try {
+        await product.save();
+    }catch (e) {
+        // tslint:disable-next-line:no-console
+        console.log(e);
+    }
     res.redirect('/');
 }
 
@@ -44,7 +49,7 @@ export const postDeleteProduct = async (req: Request<any, any, { productId: stri
 }
 
 export const getProducts = async (req: Request, res: Response) => {
-    const products = await Product.fetchAll();
+    const [products] = await Product.fetchAll();
     res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',

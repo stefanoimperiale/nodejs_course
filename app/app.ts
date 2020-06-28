@@ -1,6 +1,6 @@
 import express, {Express} from 'express';
 import bodyParser from "body-parser";
-import {router as adminRoutes} from "./routes/admin"
+import adminRoutes from "./routes/admin"
 import shopRoutes from "./routes/shop";
 import path from "path";
 import get404 from "./controllers/error"

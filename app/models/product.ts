@@ -12,11 +12,13 @@ function getProductsFromFile(): Promise<Product[]> {
 }
 
 export default class Product {
-    title: string;
 
-    constructor(title: string) {
-        this.title = title;
-    }
+    constructor(
+        public title: string,
+        public imageUrl: string,
+        public description: string,
+        public price: number
+    ) {}
 
     async save() {
         const products = await getProductsFromFile();

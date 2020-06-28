@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import Product from "../models/product";
-
+import Cart from "../models/cart";
 
 
 const getProducts = async (req: Request, res: Response) => {
@@ -12,6 +12,16 @@ const getProducts = async (req: Request, res: Response) => {
         hasProducts: products.length > 0,
         activeShop: true,
         productCSS: true,
+    });
+}
+
+const getProduct = async (req: Request<{ productId: string }>, res: Response) => {
+    const productId = +req.params.productId;
+    const product = await Product.findById(productId);
+    res.render('shop/product-detail', {
+        pageTitle: product?.title,
+        path: '/products',
+        product
     });
 }
 
@@ -34,6 +44,16 @@ const getCart = (req: Request, res: Response) => {
     });
 }
 
+const postCart = async (req: Request<any, any, { productId: string }>, res: Response) => {
+    const prodId = +req.body.productId;
+    const product = await Product.findById(prodId);
+
+    if (!product) throw new Error('Product not found');
+
+    Cart.addProduct(prodId, product.price);
+    res.redirect('/cart');
+}
+
 const getCheckout = (req: Request, res: Response) => {
     res.render('shop/checkout', {
         pageTitle: 'Checkout',
@@ -51,7 +71,9 @@ const getOrders = (req: Request, res: Response) => {
 export {
     getIndex,
     getProducts,
+    getProduct,
     getCart,
+    postCart,
     getCheckout,
-    getOrders
+    getOrders,
 };

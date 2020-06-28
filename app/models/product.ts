@@ -12,6 +12,7 @@ function getProductsFromFile(): Promise<Product[]> {
 }
 
 export default class Product {
+    id: number | undefined;
 
     constructor(
         public title: string,
@@ -20,7 +21,8 @@ export default class Product {
         public price: number
     ) {}
 
-    async save() {
+    public async save() {
+        this.id = Math.random();
         const products = await getProductsFromFile();
         products.push(this);
         fs.outputFile(p, JSON.stringify(products), (writeErr) => {
@@ -31,5 +33,10 @@ export default class Product {
 
     static fetchAll(): Promise<Product[]> {
         return getProductsFromFile();
+    }
+
+    static async findById(id:number): Promise<Product | undefined> {
+        const products = await getProductsFromFile();
+        return products.find(pr => pr.id === id);
     }
 }

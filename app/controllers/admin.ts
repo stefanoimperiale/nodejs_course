@@ -13,7 +13,7 @@ const getAddProduct = (req: Request, res: Response) => {
 
 const postAddProduct = async (req: Request<any, any, Product>, res: Response) => {
     const {title, imageUrl, price, description} = req.body;
-    const product = new Product(title, imageUrl, description, price);
+    const product = new Product(title, imageUrl, description, +price);
     await product.save();
     res.redirect('/');
 }

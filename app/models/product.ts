@@ -22,6 +22,7 @@ export default class Product {
         const products = await getProductsFromFile();
         products.push(this);
         fs.outputFile(p, JSON.stringify(products), (writeErr) => {
+            // tslint:disable-next-line:no-console
             if (writeErr) console.error(writeErr)
         });
     }

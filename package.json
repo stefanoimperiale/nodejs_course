@@ -11,6 +11,7 @@
     "dev:start": "ts-node-dev --respawn --transpileOnly ./app/app.ts",
     "prod": "npm-run-all clean lint tsc copy-assets start",
     "start": "node ./dist/app/app.js",
+    "build": "npm run prod",
     "tsc": "tsc"
   },
   "keywords": [],

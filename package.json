@@ -9,9 +9,9 @@
     "test": "echo \"Error: no test specified\" && exit 0",
     "dev": "npm run dev:start",
     "dev:start": "ts-node-dev --respawn --transpileOnly ./app/app.ts",
-    "prod": "npm-run-all clean lint tsc copy-assets start",
+    "prod": "npm-run-all build start",
     "start": "node ./dist/app/app.js",
-    "build": "npm run prod",
+    "build": "npm-run-all clean lint tsc copy-assets",
     "tsc": "tsc"
   },
   "keywords": [],

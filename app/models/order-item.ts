@@ -1,13 +1,14 @@
 import {DataTypes} from "sequelize";
 import database from "../util/database";
 
-const Cart = database.define('cart', {
+const OrderItem = database.define('orderItem', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
-        allowNull:false,
+        allowNull: false,
         primaryKey: true
-    }
+    },
+    quantity: DataTypes.INTEGER
 })
 
-export default Cart;
+export default OrderItem;

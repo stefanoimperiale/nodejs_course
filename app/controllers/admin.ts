@@ -13,43 +13,47 @@ export const getEditProduct = async (req: Request<{edit: string, productId: stri
     const editMode = req.query.edit;
     if (!editMode) res.redirect('/')
     const productId = +req.params.productId;
-    const product = await Product.findById(productId);
+    const products = await req.user.getProducts({where:productId});
     if (!productId) res.redirect('/');
     res.render('admin/edit-product', {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
         editing: editMode,
-        product
+        product: products[0]
     })
 }
 
 export const postAddProduct = async (req: Request<any, any, Product>, res: Response) => {
     const {title, imageUrl, price, description} = req.body;
-    const product = new Product(null, title, imageUrl, description, +price);
-    try {
-        await product.save();
-    }catch (e) {
-        // tslint:disable-next-line:no-console
-        console.log(e);
-    }
-    res.redirect('/');
+    req.user.createProduct({
+        title,
+        price,
+        imageUrl,
+        description,
+    });
+    res.redirect('/admin/products');
 }
 
 export const postEditProduct = async (req: Request<any, any, Product>, res: Response) => {
     const {id, title, price, description, imageUrl} = req.body;
-    const updatedProduct = new Product(id ? +id : id, title, imageUrl, description, +price);
-    updatedProduct.save();
-    res.redirect('/admin');
+    const product = await Product.findByPk(id);
+    product.title = title;
+    product.price = price;
+    product.descroption = description;
+    product.imageUrl = imageUrl;
+    await product?.save();
+    res.redirect('/admin/products');
 }
 
 export const postDeleteProduct = async (req: Request<any, any, { productId: string }>, res: Response) => {
     const prodId = req.body.productId;
-    await Product.deleteById(+prodId);
+    const product = await Product.findByPk(prodId);
+    await product?.destroy();
     res.redirect('/admin/products');
 }
 
 export const getProducts = async (req: Request, res: Response) => {
-    const [products] = await Product.fetchAll();
+    const products = await req.user.getProducts();
     res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',

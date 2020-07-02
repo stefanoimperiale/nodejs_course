@@ -12,3 +12,12 @@ services:
       - 3300:3306
     volumes:
       - ../db:/docker-entrypoint-initdb.d
+
+  mongo_node:
+    image: mongo:4.2.8
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: node-psw
+    ports:
+    - 27016:27017

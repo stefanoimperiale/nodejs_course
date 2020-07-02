@@ -1,9 +1,9 @@
 import {Request, Response} from "express";
 import Product from "../models/product.model";
-import Order from "../models/order.model";
+import { ObjectId } from "mongodb";
 
 export const getProducts = async (req: Request, res: Response) => {
-    const products = await Product.findAll();
+    const products = await Product.fetchAll();
     res.render('shop/product-list', {
         prods: products,
         pageTitle: 'All Products',
@@ -13,9 +13,9 @@ export const getProducts = async (req: Request, res: Response) => {
 
 
 export const getProduct = async (req: Request<{ productId: string }>, res: Response) => {
-    const productId = +req.params.productId;
+    const productId = req.params.productId;
     try {
-        const product = await Product.findByPk(productId);
+        const product = await Product.findById(productId);
         res.render('shop/product-detail', {
             pageTitle: product!.title,
             path: '/products',
@@ -28,7 +28,7 @@ export const getProduct = async (req: Request<{ productId: string }>, res: Respo
 }
 
 export const getIndex = async (req: Request, res: Response) => {
-    const products = await Product.findAll();
+    const products = await Product.fetchAll();
     res.render('shop/index', {
         prods: products,
         pageTitle: 'Shop',
@@ -37,8 +37,7 @@ export const getIndex = async (req: Request, res: Response) => {
 }
 
 export const getCart = async (req: Request, res: Response) => {
-    const cart = await req.user.$get('cart', {include: [Product]});
-    const cartProducts = await cart?.products;
+    const cartProducts = await req.user.getCart();
     res.render('shop/cart', {
         pageTitle: 'Your Cart',
         path: '/cart',
@@ -48,41 +47,19 @@ export const getCart = async (req: Request, res: Response) => {
 
 export const postCartDeleteProduct = async (req: Request<any, any, { productId: string }>, res: Response) => {
     const prodId = req.body.productId;
-    const cart = await req.user.$get('cart');
-    const products = await cart!.$get('products', {where: {id: prodId}})!;
-    if (products.length === 0) throw new Error(`product with id ${prodId} not found`);
-    await products[0].CartItem.destroy();
+    await req.user.deleteItemFromCart(new ObjectId(prodId));
     res.redirect('/cart');
 }
 
 export const postCart = async (req: Request<any, any, { productId: string }>, res: Response) => {
-    const prodId = +req.body.productId;
-    const cart = await req.user?.$get('cart');
-    const products = await cart?.$get('products', {where: {id: prodId}})!;
-    let newQuantity = 1;
-
-    if (products.length > 0) {
-        const product = products[0];
-        const oldQuantity = product.CartItem.quantity;
-        newQuantity = oldQuantity + 1;
-    }
-    const tableProduct = await Product.findByPk(prodId);
-    await cart?.$add('product', tableProduct!, {through: {quantity: newQuantity}});
+    const prodId = req.body.productId;
+    const product = await Product.findById(prodId);
+    await req.user.addToCart(product!);
     res.redirect('/cart');
 }
 
 export const postOrder = async (req: Request, res: Response) => {
-    const cart = await req.user.$get('cart', {include: [Product]});
-    const products = await cart?.products;
-    const order = await req.user?.$create<Order>('order', {})!;
-    await order.$add('products', products!.map(product => {
-        // @ts-ignore
-        product.OrderItem = {
-            quantity: product.CartItem.quantity
-        };
-        return product;
-    }));
-    await cart?.$set('products', []);
+    await req.user.addOrder();
     res.redirect('/orders')
 }
 
@@ -94,7 +71,7 @@ export const getCheckout = (req: Request, res: Response) => {
 }
 
 export const getOrders = async (req: Request, res: Response) => {
-    const orders = await req.user.$get('orders', {include: [Product]});
+    const orders = await req.user.getOrders();
     res.render('shop/orders', {
         pageTitle: 'Orders',
         path: '/orders',

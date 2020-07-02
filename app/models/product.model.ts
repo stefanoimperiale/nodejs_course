@@ -1,29 +1,61 @@
-import {AllowNull, BelongsTo, BelongsToMany, Column, ForeignKey, Model, Table} from "sequelize-typescript";
-import User from "./user.model";
-import CartItem from "./cart-item.model";
-import Cart from "./cart.model";
+import {getDb} from "../util/database";
+import {ObjectId} from "mongodb";
 
-@Table
-class Product extends Model {
-    @Column
-    title!: string;
+const productsColl = 'products';
 
-    @Column
-    price!: number;
+class Product {
+    public _id: ObjectId | null;
+    private userId: ObjectId | null;
 
-    @Column
-    imageUrl!: string;
+    constructor(
+        public title: string,
+        public price: number,
+        public description: string,
+        public imageUrl: string,
+        _id?: string | null,
+        userId?: string | null
+    ) {
+        this._id = _id ? new ObjectId(_id) : null;
+        this.userId = userId? new ObjectId(userId) : null;
+    }
 
-    @Column
-    description!: string;
+    async save() {
+        const db = getDb();
+        try {
+            if (this._id) {
+                // Es6 assign
+                const productToUpdate = {
+                    ...this
+                };
+                delete productToUpdate._id;
+                return await db.collection(productsColl)
+                    .updateOne({_id: this._id}, {$set: productToUpdate});
+            } else {
+                return await db.collection(productsColl).insertOne(this);
+            }
+        } catch (e) {
+            // tslint:disable-next-line:no-console
+            console.log(e);
+        }
+    }
 
-    @ForeignKey(() => User)
-    @Column
-    userId!: number;
+    static fetchAll() {
+        return getDb().collection(productsColl)
+            .find<Product>({})
+            .toArray();
+    }
 
-    @BelongsTo(() => User)
-    user!: User
+    static findById(prodId: string) {
+        return getDb().collection(productsColl)
+            .findOne<Product>({
+                _id: new ObjectId(prodId)
+            })
+    }
 
+    static deleteById(prodId: string) {
+        return getDb().collection(productsColl)
+            .deleteOne({_id: new ObjectId(prodId)})
+    }
 }
 
 export default Product;

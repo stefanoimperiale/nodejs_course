@@ -9,54 +9,43 @@ export const getAddProduct = (req: Request, res: Response) => {
     })
 }
 
-export const getEditProduct = async (req: Request<{edit: string, productId: string} >, res: Response) => {
+export const getEditProduct = async (req: Request<{ edit: string, productId: string }>, res: Response) => {
     const editMode = req.query.edit;
     if (!editMode) res.redirect('/')
-    const productId = +req.params.productId;
-    const products = await req.user.$get('products', {where: {
-        id:productId
-    }})!
-    if (products.length === 0) res.redirect('/');
+    const productId = req.params.productId;
+    const product = await Product.findById(productId);
+    if (!product) res.redirect('/');
     res.render('admin/edit-product', {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
         editing: editMode,
-        product: products[0]
+        product
     })
 }
 
 export const postAddProduct = async (req: Request<any, any, Product>, res: Response) => {
     const {title, imageUrl, price, description} = req.body;
-    await req.user?.$create<Product>('product',{
-        title,
-        price,
-        imageUrl,
-        description,
-    });
+    const user = req.user;
+    const product = new Product(title, price, description, imageUrl, null, user._id!.toHexString());
+    await product.save();
     res.redirect('/admin/products');
 }
 
 export const postEditProduct = async (req: Request<any, any, Product>, res: Response) => {
-    const {id, title, price, description, imageUrl} = req.body;
-    const product = await Product.findByPk(id);
-    if (!product) throw new Error(`No Product Found for id ${id}`)
-    product.title = title;
-    product.price = price;
-    product.description = description;
-    product.imageUrl = imageUrl;
+    const {_id, title, price, description, imageUrl} = req.body;
+    const product = new Product(title, price, description, imageUrl, _id?.toHexString());
     await product.save();
     res.redirect('/admin/products');
 }
 
 export const postDeleteProduct = async (req: Request<any, any, { productId: string }>, res: Response) => {
     const prodId = req.body.productId;
-    const product = await Product.findByPk(prodId);
-    await product?.destroy();
+    await Product.deleteById(prodId);
     res.redirect('/admin/products');
 }
 
 export const getProducts = async (req: Request, res: Response) => {
-    const products = await req.user.$get('products');
+    const products = await Product.fetchAll();
     res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',

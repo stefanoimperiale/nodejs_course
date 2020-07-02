@@ -1,13 +1,14 @@
 import express, {Express, NextFunction, Request, Response} from 'express';
 import bodyParser from "body-parser";
 import errorHandler from "strong-error-handler";
-import adminRoutes from "./routes/admin"
-import shopRoutes from "./routes/shop";
 import path from "path";
 import get404 from "./controllers/error"
-import database from "./util/database";
+import database, {getDb} from "./util/database";
 import User from "./models/user.model";
+import adminRoutes from "./routes/admin";
+import shopRoutes from "./routes/shop";
 import Cart from "./models/cart.model";
+import { ObjectId } from 'mongodb';
 
 declare global {
     namespace Express {
@@ -26,7 +27,8 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
-    req.user = (await User.findByPk(1))!;
+    const user = (await User.findById(userId))!;
+    req.user = new User(user.name, user.email,  user.cart, user._id);
     next();
 })
 
@@ -40,18 +42,13 @@ app.use(errorHandler({
     log: true,
 }));
 
+const userId = new ObjectId('5efe2693e03e6ab9e8347dfe');
+
 (async () => {
-    try {
-        await database
-            .sync({force: false}) // don't use force in production, only in dev mode
-        let user = await User.findByPk(1);
-        if (!user) {
-            user = await User.createNew( 'Max',  'test@test.com');
-            await user.$create<Cart>('cart', {});
-        }
-        app.listen(3000);
-    } catch (e) {
-        // tslint:disable-next-line:no-console
-        console.error(e);
+    await database();
+    if (!(await getDb().collection('users').findOne({_id: userId}))) {
+        const user = new User('Max', 'test@test.com', {items: [] },userId);
+        await user.save();
     }
+    app.listen(3000);
 })()

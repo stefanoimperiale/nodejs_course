@@ -1,19 +1,13 @@
-import {AllowNull, Column, ForeignKey, Model, Table} from "sequelize-typescript";
-import Order from "./order.model";
 import Product from "./product.model";
+import CartItem from "./cart-item.model";
+import User from "./user.model";
 
-@Table
-class OrderItem extends Model {
-    @Column
-    public quantity!: number;
-
-    @ForeignKey(() => Order)
-    @Column
-    public orderId!: number;
-
-    @ForeignKey(() => Product)
-    @Column
-    public productId!: number;
+class OrderItem {
+    constructor(
+        public items: ({quantity: number}& Product)[],
+        public user: User
+        ) {
+    }
 }
 
 export default OrderItem;
